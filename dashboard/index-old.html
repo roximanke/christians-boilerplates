@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnkey Deployment Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-title {
+            padding: 0 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 0.75rem 2rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .nav-item:hover {
+            background-color: var(--background);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .app-card {
+            background: var(--surface);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .app-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .app-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .app-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.75rem;
+        }
+
+        .status-running {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-stopped {
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+
+        .status-unknown {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .app-actions {
+            padding: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--background);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .logs-panel {
+            background: var(--surface);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        .logs-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .logs-content {
+            padding: 1.5rem;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        [data-theme="dark"] .logs-content {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+
+        .theme-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover .theme-icon {
+            transform: rotate(180deg);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--error-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+        <span class="theme-icon">🌙</span>
+        <span id="theme-text">Dark</span>
+    </div>
+
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>Turnkey Deploy</h1>
+                <p>Infrastructure Management</p>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Applications</div>
+                <button class="nav-item active" onclick="showSection('docker')">Docker Compose</button>
+                <button class="nav-item" onclick="showSection('kubernetes')">Kubernetes</button>
+                <button class="nav-item" onclick="showSection('ansible')">Ansible</button>
+                <button class="nav-item" onclick="showSection('terraform')">Terraform</button>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Management</div>
+                <button class="nav-item" onclick="showSection('logs')">Logs</button>
+                <button class="nav-item" onclick="showSection('settings')">Settings</button>
+            </div>
+        <main class="main-content">
+            <div class="header">
+                <h2 id="section-title">Docker Compose Applications</h2>
+                <p id="section-description">Deploy and manage containerized applications</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card clickable" onclick="showRunningApps()">
+                    <div class="stat-value" id="running-count">0</div>
+                    <div class="stat-label">Running Services</div>
+                    <div class="stat-subtitle">Click to view</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-apps">0</div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="last-deployment">Never</div>
+                    <div class="stat-label">Last Deployment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cpu-usage">0%</div>
+                    <div class="stat-label">CPU Usage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="memory-usage">0MB</div>
+                    <div class="stat-label">Memory Usage</div>
+                </div>
+                <div class="stat-card clickable" onclick="showAppDiscovery()">
+                    <div class="stat-value">+</div>
+                    <div class="stat-label">Add New App</div>
+                    <div class="stat-subtitle">Discover & Install</div>
+                </div>
+            </div>
+
+            <div id="docker-section" class="apps-grid">
+                <!-- Docker apps will be loaded here -->
+            </div>
+
+            <div id="kubernetes-section" class="apps-grid hidden">
+                <!-- Kubernetes apps will be loaded here -->
+            </div>
+
+            <div id="ansible-section" class="apps-grid hidden">
+                <!-- Ansible playbooks will be loaded here -->
+            </div>
+
+            <div id="terraform-section" class="apps-grid hidden">
+                <!-- Terraform configs will be loaded here -->
+            </div>
+
+            <div id="logs-section" class="hidden">
+                <div class="logs-panel">
+                    <div class="logs-header">
+                        <h3>Deployment Logs</h3>
+                        <button class="btn btn-secondary" onclick="refreshLogs()">Refresh</button>
+                    <div class="logs-content" id="logs-content">
+                        Loading logs...
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-section" class="hidden">
+                <div class="stat-card">
+                    <h3>System Settings</h3>
+                    <p>Configuration and system management options</p>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="checkDependencies()">Check Dependencies</button>
+                        <button class="btn btn-secondary" onclick="setupEnvironments()">Setup Environment Templates</button>
+                        <button class="btn btn-danger" onclick="stopAllServices()">Stop All Services</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Deployment Progress Modal -->
+    <div id="deployment-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="deployment-title">Deploying Application</h3>
+                <button class="modal-close" onclick="closeDeploymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="deployment-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Initializing deployment...</div>
+                </div>
+                <div class="deployment-logs" id="deployment-logs"></div>
+                <div class="deployment-result hidden" id="deployment-result">
+                    <div class="result-success">
+                        <h4>🎉 Deployment Successful!</h4>
+                        <p>Your application is now running and accessible.</p>
+                        <div class="access-urls" id="access-urls"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeploymentModal()">Close</button>
+                <button class="btn btn-primary hidden" id="open-app-btn" onclick="openDeployedApp()">Open Application</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Running Apps Modal -->
+    <div id="running-apps-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Running Applications</h3>
+                <button class="modal-close" onclick="closeRunningAppsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="running-apps-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRunningAppsModal()">Close</button>
+                <button class="btn btn-primary" onclick="refreshRunningApps()">Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Discovery Modal -->
+    <div id="app-discovery-modal" class="modal hidden">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Discover New Applications</h3>
+                <button class="modal-close" onclick="closeAppDiscoveryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-section">
+                    <div class="search-tabs">
+                        <button class="tab-btn active" onclick="switchDiscoveryTab('docker')">Docker Hub</button>
+                        <button class="tab-btn" onclick="switchDiscoveryTab('github')">GitHub</button>
+                        <button class="tab-btn" onclick="switchDiscoveryTab('awesome')">Awesome Lists</button>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="discovery-search" placeholder="Search for applications..." onkeyup="searchApps()">
+                        <button class="btn btn-primary" onclick="searchApps()">Search</button>
+                    </div>
+                </div>
+                <div class="discovery-results" id="discovery-results">
+                    <div class="discovery-placeholder">
+                        <h4>🔍 Discover New Applications</h4>
+                        <p>Search Docker Hub, GitHub repositories, or browse curated awesome lists to find new applications to deploy.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAppDiscoveryModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Editor Modal -->
+    <div id="app-editor-modal" class="modal hidden">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="editor-title">Edit Application</h3>
+                <button class="modal-close" onclick="closeAppEditorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="editor-tabs">
+                    <button class="tab-btn active" onclick="switchEditorTab('config')">Configuration</button>
+                    <button class="tab-btn" onclick="switchEditorTab('env')">Environment</button>
+                    <button class="tab-btn" onclick="switchEditorTab('compose')">Docker Compose</button>
+                </div>
+                <div class="editor-content">
+                    <div id="config-editor" class="editor-tab active">
+                        <div class="form-group">
+                            <label>Application Name</label>
+                            <input type="text" id="app-name" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="app-description" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Ports</label>
+                            <input type="text" id="app-ports" class="form-input" placeholder="8080:80,443:443">
+                        </div>
+                    </div>
+                    <div id="env-editor" class="editor-tab hidden">
+                        <textarea id="env-content" class="code-editor" rows="15" placeholder="# Environment variables
+DATABASE_URL=postgresql://user:pass@localhost/db
+API_KEY=your-api-key-here"></textarea>
+                    </div>
+                    <div id="compose-editor" class="editor-tab hidden">
+                        <textarea id="compose-content" class="code-editor" rows="20" placeholder="version: '3.8'
+services:
+  app:
+    image: nginx:latest
+    ports:
+      - '80:80'"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAppEditorModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAppConfiguration()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
